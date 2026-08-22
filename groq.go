@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math/rand"
 	"net/http"
 	"os"
 	"strings"
@@ -13,9 +14,12 @@ import (
 func askGroq(userID string, question string) (string, error) {
 
 	apiKey := os.Getenv("GROQ_API_KEY")
-	currentCase := userCase[userID]
-	fmt.Println("Case:", currentCase)
 	fmt.Println("API KEY LENGTH:", len(apiKey))
+
+	currentCase := getUserCase(userID)
+
+	fmt.Println("Case:", currentCase)
+
 	messages := []map[string]string{
 		{
 			"role": "system",
@@ -102,6 +106,12 @@ func askGroq(userID string, question string) (string, error) {
 
 	content := result.Choices[0].Message.Content
 
+	start := strings.Index(content, "</think>")
+	if start >= 0 {
+		content = content[start+8:]
+	}
+
+	content = strings.TrimSpace(content)
 	conversations[userID] = append(
 		conversations[userID],
 		map[string]string{
@@ -123,12 +133,17 @@ func askGroq(userID string, question string) (string, error) {
 			conversations[userID][len(conversations[userID])-20:]
 	}
 
-	start := strings.Index(content, "</think>")
-	if start >= 0 {
-		content = content[start+8:]
+	return content, nil
+}
+
+func getUserCase(userID string) string {
+
+	currentCase, ok := userCase[userID]
+
+	if !ok {
+		currentCase = cases[rand.Intn(len(cases))]
+		userCase[userID] = currentCase
 	}
 
-	content = strings.TrimSpace(content)
-
-	return content, nil
+	return currentCase
 }
