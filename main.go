@@ -38,7 +38,26 @@ var cases = []string{
 	"侵權損害賠償",
 	"遺產繼承",
 }
+var clientTypes = []string{
+	"理性型",
+	"情緒型",
+	"健談型",
+	"寡言型",
+	"強勢型",
+	"緊張型",
+	"不信任型",
+	"記憶模糊型",
+	"愛抱怨型",
+	"自以為懂法律型",
+}
+var difficulties = []string{
+	"簡單",
+	"普通",
+	"困難",
+}
 var userCase = map[string]string{}
+var userClientType = map[string]string{}
+var userDifficulty = map[string]string{}
 
 func webhook(w http.ResponseWriter, r *http.Request) {
 
@@ -63,12 +82,24 @@ func webhook(w http.ResponseWriter, r *http.Request) {
 			delete(conversations, userID)
 
 			caseType := cases[rand.Intn(len(cases))]
+			clientType := clientTypes[rand.Intn(len(clientTypes))]
+			difficulty := difficulties[rand.Intn(len(difficulties))]
 
 			userCase[userID] = caseType
-
+			userClientType[userID] = clientType
+			userDifficulty[userID] = difficulty
 			replyMessage(
 				req.Events[0].ReplyToken,
-				"已建立新案件\n案件類型："+caseType,
+				fmt.Sprintf(
+					`已建立新案件
+
+案件類型：%s
+客戶類型：%s
+難度：%s`,
+					caseType,
+					clientType,
+					difficulty,
+				),
 			)
 
 			return
