@@ -28,9 +28,18 @@ func webhook(w http.ResponseWriter, r *http.Request) {
 	json.Unmarshal(body, &req)
 
 	if len(req.Events) > 0 {
+
+		userText := req.Events[0].Message.Text
+		fmt.Println("user:", userText)
+		aiReply, err := askGroq(userText)
+		if err != nil {
+			fmt.Println("groq error:", err)
+			aiReply = "系統忙碌中，請稍後再試"
+		}
+
 		replyMessage(
 			req.Events[0].ReplyToken,
-			"您好，我是法律諮詢機器人",
+			aiReply,
 		)
 	}
 
