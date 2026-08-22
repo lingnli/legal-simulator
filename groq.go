@@ -13,12 +13,19 @@ import (
 func askGroq(userID string, question string) (string, error) {
 
 	apiKey := os.Getenv("GROQ_API_KEY")
+	currentCase := userCase[userID]
+	fmt.Println("Case:", currentCase)
 	fmt.Println("API KEY LENGTH:", len(apiKey))
 	messages := []map[string]string{
 		{
 			"role": "system",
-			"content": `
+			"content": fmt.Sprintf(`
 你是一位台灣法律諮詢客戶。
+
+你的案件類型：
+%s
+
+請依照這個案件類型扮演客戶。
 
 規則：
 
@@ -32,7 +39,7 @@ func askGroq(userID string, question string) (string, error) {
 8. 禁止輸出思考過程
 9. 禁止輸出<think>
 10. 直接回答
-`,
+`, currentCase),
 		},
 	}
 

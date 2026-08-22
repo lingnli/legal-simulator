@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math/rand"
 	"net/http"
 	"os"
 )
@@ -25,6 +26,19 @@ type WebhookRequest struct {
 }
 
 var conversations = map[string][]map[string]string{}
+var cases = []string{
+	"車禍糾紛",
+	"勞資糾紛",
+	"離婚案件",
+	"監護權爭議",
+	"租賃糾紛",
+	"借貸糾紛",
+	"詐騙案件",
+	"網購糾紛",
+	"侵權損害賠償",
+	"遺產繼承",
+}
+var userCase = map[string]string{}
 
 func webhook(w http.ResponseWriter, r *http.Request) {
 
@@ -48,9 +62,13 @@ func webhook(w http.ResponseWriter, r *http.Request) {
 
 			delete(conversations, userID)
 
+			caseType := cases[rand.Intn(len(cases))]
+
+			userCase[userID] = caseType
+
 			replyMessage(
 				req.Events[0].ReplyToken,
-				"已建立新案件",
+				"已建立新案件\n案件類型："+caseType,
 			)
 
 			return
