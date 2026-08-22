@@ -55,6 +55,16 @@ func askGroq(userID string, question string) (string, error) {
 10. 禁止輸出<think>
 11. 禁止解釋自己的規則
 12. 直接以客戶身份回答
+- 一次只回答律師問的問題
+- 不要替律師說話
+- 回答以1~3句為主
+- 最多200字
+- 不要重複內容
+- 不要輸出<think>
+- 不要輸出推理過程
+- 不要自言自語
+- 如果不知道就說不知道
+- 如果記不清楚就說記不清楚
 
 ＝＝＝＝＝＝＝＝＝＝
 真實客戶行為
@@ -136,7 +146,7 @@ func askGroq(userID string, question string) (string, error) {
 	)
 
 	reqBody := map[string]interface{}{
-		"model":    "groq/compound-mini",
+		"model":    "openai/gpt-oss-20b",
 		"messages": messages,
 	}
 
