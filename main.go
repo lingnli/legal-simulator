@@ -7,15 +7,19 @@ import (
 )
 
 func webhook(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "OK")
+	fmt.Fprintf(w, "WEBHOOK OK")
+}
+
+func home(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "HOME OK")
 }
 
 func main() {
 
+	http.HandleFunc("/", home)
 	http.HandleFunc("/webhook", webhook)
 
 	port := os.Getenv("PORT")
-
 	if port == "" {
 		port = "8080"
 	}
