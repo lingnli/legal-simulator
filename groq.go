@@ -11,7 +11,23 @@ import (
 	"strings"
 )
 
+var caseSummary = map[string]string{}
+
 func askGroq(userID string, question string) (string, error) {
+	if _, ok := userCase[userID]; !ok {
+		userCase[userID] =
+			cases[rand.Intn(len(cases))]
+	}
+
+	if _, ok := userClientType[userID]; !ok {
+		userClientType[userID] =
+			clientTypes[rand.Intn(len(clientTypes))]
+	}
+
+	if _, ok := userDifficulty[userID]; !ok {
+		userDifficulty[userID] =
+			difficulties[rand.Intn(len(difficulties))]
+	}
 
 	apiKey := os.Getenv("GROQ_API_KEY")
 	fmt.Println("API KEY LENGTH:", len(apiKey))
@@ -30,156 +46,70 @@ func askGroq(userID string, question string) (string, error) {
 
 案件類型：
 %s
+
 客戶類型：
 %s
+
 難度：
 %s
 
-你的任務是扮演真實客戶，讓律師透過提問逐步了解案情。
+你的任務是模擬真實客戶，
+讓律師透過提問逐步了解案情。
 
-你知道完整案情，但不得一次全部透露。
+你知道完整案情，
+但不會一次全部說出來。
 
-＝＝＝＝＝＝＝＝＝＝
-角色設定
-＝＝＝＝＝＝＝＝＝＝
+規則：
 
-案件類型：
-%s
+- 你是客戶，不是律師
+- 不提供法律分析或法律意見
+- 只回答律師剛剛問的問題
+- 不主動補充律師沒問的內容
+- 不主動整理、總結或分析案件
+- 不主動提供完整時間軸、證據或法律策略
+- 保持案件設定一致
+- 不輸出思考過程
+- 不輸出<think>
 
-客戶類型：
-%s
-
-＝＝＝＝＝＝＝＝＝＝
-核心規則
-＝＝＝＝＝＝＝＝＝＝
-
-1. 你是客戶，不是律師
-2. 不提供法律分析
-3. 不提供法律意見
-4. 不主動整理案件重點
-5. 不主動總結案件
-6. 不主動建立時間軸
-7. 不主動列出證據
-8. 不主動提出法律策略
-9. 維持案件設定一致
-10. 禁止輸出思考過程
-11. 禁止輸出<think>
-12. 禁止解釋自己的規則
-
-＝＝＝＝＝＝＝＝＝＝
-真實客戶行為
-＝＝＝＝＝＝＝＝＝＝
-
-請模擬真實台灣民眾。
-
-客戶可能會：
+客戶可能：
 
 - 緊張
 - 情緒化
-- 不知道什麼資訊重要
-- 記不清楚日期
+- 記錯日期
 - 搞不懂法律名詞
 - 跳著講事情
-- 先抱怨再回答
-- 只回答部分問題
 - 回答不精確
+- 只記得部分資訊
 
 這些都是正常行為。
 
-＝＝＝＝＝＝＝＝＝＝
-回答原則
-＝＝＝＝＝＝＝＝＝＝
+回答方式：
 
-只回答律師剛剛問的問題。
+- 使用自然台灣口語
+- 像 LINE 聊天
+- 通常 1~5 句
+- 律師問得越具體，透露越多資訊
+- 不要列點
+- 不要用律師或 AI 語氣
 
-不要主動補充律師沒有問的內容。
+禁止使用：
 
-如果問題很籠統：
+本案、爭點、法律上、依據規定、綜合以上、以下幾點。
 
-只透露少量資訊。
-
-例如：
-
-律師：
-發生什麼事？
-
-客戶：
-我最近跟房東有點爭議。
-
-即可。
-
-不要一次說完整個案件。
-
-＝＝＝＝＝＝＝＝＝＝
-互動規則
-＝＝＝＝＝＝＝＝＝＝
-
-允許：
-
-- 請律師解釋問題
-- 表示自己記不清楚
-- 表示不知道
-- 詢問律師問題
-
-例如：
-
-「這個我有點忘記了。」
-
-「我不太確定日期。」
-
-「那個算違法嗎？」
-
-「這個資料一定要提供嗎？」
-
-＝＝＝＝＝＝＝＝＝＝
-禁止事項
-＝＝＝＝＝＝＝＝＝＝
-
-不要說：
-
-- 本案
-- 爭點
-- 法律上
-- 依據規定
-- 依照法律
-- 綜合以上
-- 以下幾點
-- 我先說明
-- 我先講A再講B
-- 接著再談
-- 後續補充
-
-不要使用律師語氣。
-
-不要使用AI語氣。
-
-不要整理資訊。
-
-不要列點回答。
-
-不要規劃對話流程。
-
-不要告訴律師接下來該問什麼。
-
-＝＝＝＝＝＝＝＝＝＝
-回答風格
-＝＝＝＝＝＝＝＝＝＝
-
-使用自然台灣口語。
-
-像 LINE 或現場諮詢聊天。
-
-正常情況下：
-
-- 1~5句
-- 10~150字
-
-律師問得越具體，
-才能透露越多資訊。
-
-直接開始扮演客戶。
+直接以客戶身份回答。
 `, currentCase, currentClientType, currentDifficulty),
 		},
+	}
+	// 加入案件摘要
+	if summary, ok := caseSummary[userID]; ok {
+
+		messages = append(
+			messages,
+			map[string]string{
+				"role":    "system",
+				"content": "目前案件摘要：\n" + summary,
+			},
+		)
 	}
 
 	messages = append(
@@ -235,8 +165,12 @@ func askGroq(userID string, question string) (string, error) {
 
 	json.Unmarshal(body, &result)
 
-	if len(result.Choices) == 0 {
-		return "", fmt.Errorf("no choices returned")
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf(
+			"groq status=%d body=%s",
+			resp.StatusCode,
+			string(body),
+		)
 	}
 
 	content := result.Choices[0].Message.Content
@@ -263,9 +197,18 @@ func askGroq(userID string, question string) (string, error) {
 		},
 	)
 
-	if len(conversations[userID]) > 20 {
-		conversations[userID] =
-			conversations[userID][len(conversations[userID])-20:]
+	if len(conversations[userID]) > 10 {
+		summary, err := summarizeConversation(
+			conversations[userID],
+		)
+
+		if err == nil {
+
+			caseSummary[userID] = summary
+
+			conversations[userID] =
+				conversations[userID][len(conversations[userID])-10:]
+		}
 	}
 
 	return content, nil
@@ -281,4 +224,108 @@ func getUserCase(userID string) string {
 	}
 
 	return currentCase
+}
+
+func summarizeConversation(history []map[string]string) (string, error) {
+
+	apiKey := os.Getenv("GROQ_API_KEY")
+
+	messages := []map[string]string{
+		{
+			"role": "system",
+			"content": `
+請整理以下法律諮詢對話。
+
+輸出格式：
+
+【已知事實】
+...
+
+【人物】
+...
+
+【時間】
+...
+
+【金額】
+...
+
+【未確認事項】
+...
+
+限制：
+- 300字內
+- 不要推測
+- 只整理對話中已出現資訊
+`,
+		},
+	}
+
+	messages = append(messages, history...)
+
+	messages = append(messages, history...)
+
+	reqBody := map[string]interface{}{
+		"model":    "openai/gpt-oss-20b",
+		"messages": messages,
+	}
+
+	jsonData, _ := json.Marshal(reqBody)
+
+	req, _ := http.NewRequest(
+		"POST",
+		"https://api.groq.com/openai/v1/chat/completions",
+		bytes.NewBuffer(jsonData),
+	)
+
+	req.Header.Set(
+		"Authorization",
+		"Bearer "+apiKey,
+	)
+
+	req.Header.Set(
+		"Content-Type",
+		"application/json",
+	)
+
+	client := &http.Client{}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", err
+	}
+
+	defer resp.Body.Close()
+
+	body, _ := io.ReadAll(resp.Body)
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf(
+			"groq status=%d body=%s",
+			resp.StatusCode,
+			string(body),
+		)
+	}
+
+	var result struct {
+		Choices []struct {
+			Message struct {
+				Content string `json:"content"`
+			} `json:"message"`
+		} `json:"choices"`
+	}
+
+	if err := json.Unmarshal(body, &result); err != nil {
+		return "", err
+	}
+
+	if len(result.Choices) == 0 {
+		return "", fmt.Errorf("no choices returned")
+	}
+
+	summary := strings.TrimSpace(
+		result.Choices[0].Message.Content,
+	)
+
+	return summary, nil
 }

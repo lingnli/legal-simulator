@@ -80,6 +80,9 @@ func webhook(w http.ResponseWriter, r *http.Request) {
 		if userText == "/new" {
 
 			delete(conversations, userID)
+			delete(userCase, userID)
+			delete(userClientType, userID)
+			delete(userDifficulty, userID)
 
 			caseType := cases[rand.Intn(len(cases))]
 			clientType := clientTypes[rand.Intn(len(clientTypes))]
