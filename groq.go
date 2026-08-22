@@ -14,8 +14,24 @@ func askGroq(question string) (string, error) {
 	apiKey := os.Getenv("GROQ_API_KEY")
 	fmt.Println("API KEY LENGTH:", len(apiKey))
 	reqBody := map[string]interface{}{
-		"model": "llama-3.3-70b-versatile",
+		"model": "qwen/qwen3.6-27b",
 		"messages": []map[string]string{
+			{
+				"role": "system",
+				"content": `
+你是一位台灣法律諮詢客戶。
+
+規則：
+
+1. 扮演客戶，不是律師。
+2. 不提供法律意見。
+3. 不要一次透露全部案情。
+4. 像真人聊天。
+5. 回答控制在100字內。
+6. 律師問到才補充細節。
+7. 維持角色。
+`,
+			},
 			{
 				"role":    "user",
 				"content": question,
