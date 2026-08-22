@@ -10,16 +10,14 @@ import (
 	"strings"
 )
 
-func askGroq(question string) (string, error) {
+func askGroq(userID string, question string) (string, error) {
 
 	apiKey := os.Getenv("GROQ_API_KEY")
 	fmt.Println("API KEY LENGTH:", len(apiKey))
-	reqBody := map[string]interface{}{
-		"model": "openai/gpt-oss-20b",
-		"messages": []map[string]string{
-			{
-				"role": "system",
-				"content": `
+	messages := []map[string]string{
+		{
+			"role": "system",
+			"content": `
 你是一位台灣法律諮詢客戶。
 
 規則：
@@ -35,12 +33,25 @@ func askGroq(question string) (string, error) {
 9. 禁止輸出<think>
 10. 直接回答
 `,
-			},
-			{
-				"role":    "user",
-				"content": question,
-			},
 		},
+	}
+
+	messages = append(
+		messages,
+		conversations[userID]...,
+	)
+
+	messages = append(
+		messages,
+		map[string]string{
+			"role":    "user",
+			"content": question,
+		},
+	)
+
+	reqBody := map[string]interface{}{
+		"model":    "groq/compound-mini",
+		"messages": messages,
 	}
 
 	jsonData, _ := json.Marshal(reqBody)
@@ -83,6 +94,27 @@ func askGroq(question string) (string, error) {
 	}
 
 	content := result.Choices[0].Message.Content
+
+	conversations[userID] = append(
+		conversations[userID],
+		map[string]string{
+			"role":    "user",
+			"content": question,
+		},
+	)
+
+	conversations[userID] = append(
+		conversations[userID],
+		map[string]string{
+			"role":    "assistant",
+			"content": content,
+		},
+	)
+
+	if len(conversations[userID]) > 20 {
+		conversations[userID] =
+			conversations[userID][len(conversations[userID])-20:]
+	}
 
 	start := strings.Index(content, "</think>")
 	if start >= 0 {

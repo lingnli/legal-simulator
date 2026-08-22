@@ -12,26 +12,55 @@ import (
 type WebhookRequest struct {
 	Events []struct {
 		ReplyToken string `json:"replyToken"`
-		Message    struct {
+
+		Source struct {
+			UserID string `json:"userId"`
+		} `json:"source"`
+
+		Message struct {
 			Type string `json:"type"`
 			Text string `json:"text"`
 		} `json:"message"`
 	} `json:"events"`
 }
 
+var conversations = map[string][]map[string]string{}
+
 func webhook(w http.ResponseWriter, r *http.Request) {
 
 	body, _ := io.ReadAll(r.Body)
+
 	fmt.Println("=== WEBHOOK HIT ===")
 	fmt.Println(string(body))
+
 	var req WebhookRequest
 	json.Unmarshal(body, &req)
 
 	if len(req.Events) > 0 {
 
 		userText := req.Events[0].Message.Text
+		userID := req.Events[0].Source.UserID
+
 		fmt.Println("user:", userText)
-		aiReply, err := askGroq(userText)
+		fmt.Println("userID:", userID)
+
+		if userText == "/new" {
+
+			delete(conversations, userID)
+
+			replyMessage(
+				req.Events[0].ReplyToken,
+				"已建立新案件",
+			)
+
+			return
+		}
+
+		aiReply, err := askGroq(
+			userID,
+			userText,
+		)
+
 		if err != nil {
 			fmt.Println("groq error:", err)
 			aiReply = "系統忙碌中，請稍後再試"
