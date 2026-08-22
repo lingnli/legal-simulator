@@ -15,7 +15,7 @@ func askGroq(question string) (string, error) {
 	apiKey := os.Getenv("GROQ_API_KEY")
 	fmt.Println("API KEY LENGTH:", len(apiKey))
 	reqBody := map[string]interface{}{
-		"model": "qwen/qwen3.6-27b",
+		"model": "openai/gpt-oss-20b",
 		"messages": []map[string]string{
 			{
 				"role": "system",
