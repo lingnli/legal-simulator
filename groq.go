@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strings"
 )
 
 func askGroq(question string) (string, error) {
@@ -81,5 +82,14 @@ func askGroq(question string) (string, error) {
 		return "", fmt.Errorf("no choices returned")
 	}
 
-	return result.Choices[0].Message.Content, nil
+	content := result.Choices[0].Message.Content
+
+	start := strings.Index(content, "</think>")
+	if start >= 0 {
+		content = content[start+8:]
+	}
+
+	content = strings.TrimSpace(content)
+
+	return content, nil
 }
