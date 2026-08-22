@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -11,7 +12,7 @@ import (
 func askGroq(question string) (string, error) {
 
 	apiKey := os.Getenv("GROQ_API_KEY")
-
+	fmt.Println("API KEY LENGTH:", len(apiKey))
 	reqBody := map[string]interface{}{
 		"model": "llama-3.3-70b-versatile",
 		"messages": []map[string]string{
@@ -44,6 +45,9 @@ func askGroq(question string) (string, error) {
 
 	body, _ := io.ReadAll(resp.Body)
 
+	fmt.Println("Groq Status:", resp.StatusCode)
+	fmt.Println("Groq Response:", string(body))
+
 	var result struct {
 		Choices []struct {
 			Message struct {
@@ -53,6 +57,10 @@ func askGroq(question string) (string, error) {
 	}
 
 	json.Unmarshal(body, &result)
+
+	if len(result.Choices) == 0 {
+		return "", fmt.Errorf("no choices returned")
+	}
 
 	return result.Choices[0].Message.Content, nil
 }
